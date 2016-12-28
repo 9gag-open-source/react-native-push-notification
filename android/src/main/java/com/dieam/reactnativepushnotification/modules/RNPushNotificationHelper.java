@@ -22,6 +22,9 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.facebook.react.bridge.ReadableMap;
+import com.facebook.imagepipeline.datasource.BaseBitmapDataSubscriber;
+import com.facebook.datasource.DataSource;
+import android.support.annotation.Nullable;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -128,7 +131,28 @@ public class RNPushNotificationHelper {
         }
     }
 
-    public void sendToNotificationCentre(Bundle bundle) {
+    public void sendToNotificationCentre(final Bundle bundle) {
+        final String largeIcon = bundle.getString("largeIcon");
+        if (largeIcon != null && (largeIcon.toLowerCase().startsWith("http:") || largeIcon.toLowerCase().startsWith("https:"))) {
+
+            FrescoHelper.loadBitmap(largeIcon, new BaseBitmapDataSubscriber() {
+                @Override
+                public void onNewResultImpl(@Nullable Bitmap bitmap) {
+                    sendToNotificationCentreWithThumbnail(bundle, bitmap);
+                }   
+
+                @Override
+                public void onFailureImpl(DataSource dataSource) {
+                    sendToNotificationCentreWithThumbnail(bundle, null);
+                }   
+            }, 128, 128, context); 
+
+        } else {
+            sendToNotificationCentreWithThumbnail(bundle, null);
+        }
+    }
+
+    private void sendToNotificationCentreWithThumbnail(Bundle bundle, Bitmap thumbnail) {
         try {
             Class intentClass = getMainActivityClass();
             if (intentClass == null) {
@@ -209,9 +233,9 @@ public class RNPushNotificationHelper {
                 largeIconResId = res.getIdentifier("ic_launcher", "mipmap", packageName);
             }
 
-            Bitmap largeIconBitmap = BitmapFactory.decodeResource(res, largeIconResId);
+            Bitmap largeIconBitmap = thumbnail == null ? BitmapFactory.decodeResource(res, largeIconResId) : thumbnail;
 
-            if (largeIconResId != 0 && (largeIcon != null || Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)) {
+            if ((largeIconBitmap != null || Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)) {
                 notification.setLargeIcon(largeIconBitmap);
             }
 
