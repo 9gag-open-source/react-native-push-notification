@@ -12,6 +12,7 @@ import android.os.Bundle;
 import com.dieam.reactnativepushnotification.helpers.ApplicationBadgeHelper;
 import com.facebook.react.bridge.ActivityEventListener;
 import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContext;
@@ -25,7 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-public class RNPushNotification extends ReactContextBaseJavaModule implements ActivityEventListener {
+public class RNPushNotification extends ReactContextBaseJavaModule implements ActivityEventListener, LifecycleEventListener {
     public static final String LOG_TAG = "RNPushNotification";// all logging should use this tag
 
     private RNPushNotificationHelper mRNPushNotificationHelper;
@@ -36,6 +37,7 @@ public class RNPushNotification extends ReactContextBaseJavaModule implements Ac
         super(reactContext);
 
         reactContext.addActivityEventListener(this);
+        reactContext.addLifecycleEventListener(this);
 
         Application applicationContext = (Application) reactContext.getApplicationContext();
         // The @ReactNative methods use this
@@ -164,6 +166,24 @@ public class RNPushNotification extends ReactContextBaseJavaModule implements Ac
     // removed @Override temporarily just to get it working on different versions of RN
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         // Ignored, required to implement ActivityEventListener for RN 0.33
+    }
+        
+    @Override
+    public void onHostResume() {
+        Intent intent = null;
+        while ((intent = RNPushNotificationDelegate.getSharedBuffer().pop()) != null) {
+            onNewIntent(intent);
+        }
+    }
+
+    @Override
+    public void onHostPause() {
+        // Skip
+    }
+
+    @Override
+    public void onHostDestroy() {
+        // Skip
     }
 
     @ReactMethod
