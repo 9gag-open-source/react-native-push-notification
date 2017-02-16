@@ -36,12 +36,16 @@ android {
     }
 }
 
+ext {
+	playServiceVersion = '10.0.1'
+}
+
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:23.1.1'
     compile 'com.facebook.react:react-native:+'
-    compile 'com.google.android.gms:play-services-gcm:+'
+    compile "com.google.android.gms:play-services-gcm:${playServiceVersion}"
     compile 'me.leolin:ShortcutBadger:1.1.8@aar'
     compile 'com.facebook.fresco:fresco:0.14.1'
 }
