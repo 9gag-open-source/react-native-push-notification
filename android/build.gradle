@@ -37,7 +37,7 @@ android {
 }
 
 ext {
-	playServiceVersion = '10.0.1'
+	playServiceVersion = '+'
 }
 
 dependencies {
